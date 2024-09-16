@@ -2,14 +2,19 @@
   "name": "vscode-artifactory",
   "displayName": "vscode-artifactory",
   "description": "Extract code from project files into a markdown file",
-  "version": "0.5.0",
   "icon": "resources/icon.png",
+  "version": "0.5.0",
+  "publisher": "quzma",
   "engines": {
     "vscode": "^1.93.0"
   },
   "categories": [
     "Other"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DarkoKuzmanovic/vscode-artifactory.git"
+  },
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
@@ -29,10 +34,6 @@
         }
       }
     }
-  },
-  "repository": {
-      "type": "git",
-      "url": "https://github.com/DarkoKuzmanovic/vscode-artifactory.git"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
