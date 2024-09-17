@@ -1,6 +1,7 @@
 echo ".vscode/**
 .vscode-test/**
 node_modules/**
+resources/*.ai
 src/**
 .gitignore
 .yarnrc

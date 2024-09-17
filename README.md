@@ -46,6 +46,7 @@ Currently, there are no known issues. If you encounter any problems, please repo
 ### 0.5.0
 
 Initial release of VSCode Artifactory:
+
 - Basic code extraction functionality
 - File tree generation
 - Progress indicator
