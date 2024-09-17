@@ -39,6 +39,10 @@ Currently, there are no known issues. If you encounter any problems, please repo
 
 ## Release Notes
 
+### 0.5.2
+
+- Made smaller changes to code
+
 ### 0.5.1
 
 - Changed displayName

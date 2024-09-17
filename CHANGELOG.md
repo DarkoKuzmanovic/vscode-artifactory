@@ -2,6 +2,10 @@
 
 All notable changes to the "vscode-artifactory" extension will be documented in this file.
 
+## [0.5.2] - 2024-09-17
+
+- Made smaller changes to code
+
 ## [0.5.1] - 2024-09-17
 
 ### Changed

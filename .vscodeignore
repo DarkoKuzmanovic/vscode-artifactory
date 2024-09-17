@@ -1,7 +1,5 @@
-echo ".vscode/**
+.vscode/**
 .vscode-test/**
-node_modules/**
-resources/*.ai
 src/**
 .gitignore
 .yarnrc
@@ -10,4 +8,5 @@ vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map
-**/*.ts" > .vscodeignore
+**/*.ts
+*.ai
