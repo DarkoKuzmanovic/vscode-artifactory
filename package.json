@@ -3,7 +3,7 @@
   "displayName": "VS Code Artifactory",
   "description": "Extract code from project files into a markdown file",
   "icon": "resources/icon.png",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "publisher": "quzma",
   "engines": {
     "vscode": "^1.93.0"
@@ -34,6 +34,22 @@
           "type": "string",
           "default": "extracted_code.md",
           "description": "The name of the output file for extracted code"
+        },
+        "vscode-artifactory.includeExtensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of file extensions to include (e.g., ['.ahk', '.ini'])"
+        },
+        "vscode-artifactory.excludeExtensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of file extensions to exclude (overrides includeExtensions)"
         }
       }
     }
@@ -44,7 +60,8 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "package": "vsce package --out build"
   },
   "devDependencies": {
     "@types/vscode": "^1.93.0",

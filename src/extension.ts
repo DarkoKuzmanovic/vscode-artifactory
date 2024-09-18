@@ -5,6 +5,18 @@ import ignore from 'ignore';
 
 const config = vscode.workspace.getConfiguration('vscode-artifactory');
 const outputFile = config.get('outputFile', 'extracted_code.md');
+const userIncludeExtensions: string[] = config.get('includeExtensions', []);
+const userExcludeExtensions: string[] = config.get('excludeExtensions', []);
+
+// Convert user-provided extensions to lowercase and ensure they start with a dot
+const normalizeExtensions = (extensions: string[]): Set<string> => {
+    return new Set(
+        extensions.map(ext => ext.startsWith('.') ? ext.toLowerCase() : `.${ext.toLowerCase()}`)
+    );
+};
+
+const USER_INCLUDE_EXTENSIONS = normalizeExtensions(userIncludeExtensions);
+const USER_EXCLUDE_EXTENSIONS = normalizeExtensions(userExcludeExtensions);
 
 const CODING_LANGUAGES = new Set([
     'javascript', 'typescript', 'python', 'java', 'c', 'cpp', 'csharp', 'go',
@@ -48,7 +60,18 @@ async function isCodingFile(file: vscode.Uri): Promise<boolean> {
     try {
         const doc = await vscode.workspace.openTextDocument(file);
         const languageId = doc.languageId.toLowerCase();
-        return CODING_LANGUAGES.has(languageId);
+        if (CODING_LANGUAGES.has(languageId)) {
+            return true;
+        }
+        // Check if the file extension is in user include/exclude lists
+        const ext = path.extname(file.fsPath).toLowerCase();
+        if (USER_EXCLUDE_EXTENSIONS.has(ext)) {
+            return false;
+        }
+        if (USER_INCLUDE_EXTENSIONS.has(ext)) {
+            return true;
+        }
+        return false;
     } catch (error) {
         console.error(`Error opening file ${file.fsPath}:`, error);
         return false;
@@ -57,11 +80,11 @@ async function isCodingFile(file: vscode.Uri): Promise<boolean> {
 
 function generateFileTree(files: string[]): string {
     const tree: { [key: string]: any } = {};
-    
+
     for (const file of files) {
         const parts = file.split(/[\/\\]/);  // Split on both forward and backward slashes
         let currentLevel = tree;
-        
+
         for (let i = 0; i < parts.length; i++) {
             const part = parts[i];
             if (i === parts.length - 1) {
@@ -74,24 +97,24 @@ function generateFileTree(files: string[]): string {
             }
         }
     }
-    
+
     function renderTree(node: { [key: string]: any }, prefix: string = '', isLast = true): string {
         let result = '';
-        const keys = Object.keys(node);
+        const keys = Object.keys(node).sort();
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
             const isLastItem = i === keys.length - 1;
             const newPrefix = prefix + (isLast ? '    ' : '│   ');
-            
+
             result += `${prefix}${isLastItem ? '└── ' : '├── '}${key}\n`;
-            
+
             if (node[key] !== null) {
                 result += renderTree(node[key], newPrefix, isLastItem);
             }
         }
         return result;
     }
-    
+
     return renderTree(tree, '', true);
 }
 
@@ -159,11 +182,11 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (processedFiles > 0) {
                 const fileTree = generateFileTree(extractedFiles);
-                const fullMarkdown = `# Extracted Code Overview\n\n## File Tree\n\`\`\`\n${fileTree}\`\`\n${markdown}`;
+                const fullMarkdown = `# Extracted Code Overview\n\n## File Tree\n\`\`\`\n${fileTree}\`\`\`\n${markdown}`;
                 
                 const markdownFile = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, outputFile));
                 await vscode.workspace.fs.writeFile(markdownFile, Buffer.from(fullMarkdown));
-                vscode.window.showInformationMessage(`Code extraction complete. Processed ${processedFiles} files, extracted ${extractedFiles.length} to extracted_code.md`);
+                vscode.window.showInformationMessage(`Code extraction complete. Processed ${processedFiles} files, extracted ${extractedFiles.length} to ${outputFile}`);
             } else {
                 vscode.window.showInformationMessage('No files were processed. Check your ignore settings and file types.');
             }
