@@ -3,7 +3,7 @@
   "displayName": "VS Code Artifactory",
   "description": "Extract code from project files into a markdown file",
   "icon": "resources/icon.png",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "publisher": "quzma",
   "engines": {
     "vscode": "^1.93.0"
@@ -61,17 +61,19 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
+    "release": "standard-version",
     "package": "vsce package --out build"
   },
   "devDependencies": {
-    "@types/vscode": "^1.93.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
+    "@types/vscode": "^1.93.0",
     "@typescript-eslint/eslint-plugin": "^8.3.0",
     "@typescript-eslint/parser": "^8.3.0",
-    "eslint": "^9.9.1",
-    "typescript": "^5.5.4",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.9.1",
+    "standard-version": "^9.5.0",
+    "typescript": "^5.5.4"
   }
 }
