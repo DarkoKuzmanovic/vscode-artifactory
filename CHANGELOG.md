@@ -2,12 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [0.7.1](https://github.com/DarkoKuzmanovic/vscode-artifactory/compare/v0.7.0...v0.7.1) (2024-09-20)
-
-
-### Features
-
-* Add max file size configuration and file size validation ([5589f82](https://github.com/DarkoKuzmanovic/vscode-artifactory/commits/5589f828b4a4d2dafb55540fcbfcc091ce766349))
+## [0.8.0](https://github.com/DarkoKuzmanovic/vscode-artifactory/compare/v0.7.1...v0.8.0) (2024-09-20)
 
 ## [0.7.0](https://github.com/DarkoKuzmanovic/vscode-artifactory/compare/v0.6.2...v0.7.0) (2024-09-20)
 
