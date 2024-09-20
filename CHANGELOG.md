@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.7.0](https://github.com/DarkoKuzmanovic/vscode-artifactory/compare/v0.6.2...v0.7.0) (2024-09-20)
+
+
+### Features
+
+* Add standard-version for automated changelog generation ([929a9ad](https://github.com/DarkoKuzmanovic/vscode-artifactory/commits/929a9ade8494a71f09979a983cc0441d20f30341))
+
 ## [0.6.2](https://github.com/DarkoKuzmanovic/vscode-artifactory/compare/v0.6.1...v0.6.2) (2024-09-20)
 
 ### Features

@@ -3,7 +3,7 @@
   "displayName": "VS Code Artifactory",
   "description": "Extract code from project files into a markdown file",
   "icon": "resources/icon.png",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "publisher": "quzma",
   "engines": {
     "vscode": "^1.93.0"
@@ -50,6 +50,11 @@
           },
           "default": [],
           "description": "List of file extensions to exclude (overrides includeExtensions)"
+        },
+        "vscode-artifactory.maxFileSizeKB": {
+          "type": "number",
+          "default": 1024,
+          "description": "Maximum file size in KB to process (default: 1024 KB or 1 MB)"
         }
       }
     }
