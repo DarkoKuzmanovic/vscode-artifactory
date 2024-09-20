@@ -3,7 +3,7 @@
   "displayName": "VS Code Artifactory",
   "description": "Extract code from project files into a markdown file",
   "icon": "resources/icon.png",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "publisher": "quzma",
   "engines": {
     "vscode": "^1.93.0"
@@ -62,7 +62,8 @@
     "lint": "eslint src",
     "test": "vscode-test",
     "release": "standard-version",
-    "package": "vsce package --out build"
+    "package": "vsce package --out build",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",
