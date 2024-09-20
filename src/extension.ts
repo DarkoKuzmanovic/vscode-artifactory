@@ -9,7 +9,6 @@ const userIncludeExtensions: string[] = config.get('includeExtensions', []);
 const userExcludeExtensions: string[] = config.get('excludeExtensions', []);
 const maxFileSizeKB = config.get('maxFileSizeKB', 1024);
 
-// Convert user-provided extensions to lowercase and ensure they start with a dot
 const normalizeExtensions = (extensions: string[]): Set<string> => {
     return new Set(
         extensions.map(ext => ext.startsWith('.') ? ext.toLowerCase() : `.${ext.toLowerCase()}`)
@@ -44,8 +43,16 @@ const EXCLUDED_FILES = new Set([
     'Cargo.lock'
 ]);
 
+const extensionCache = new Map<string, string>();
+function getFileExtension(filePath: string): string {
+    if (!extensionCache.has(filePath)) {
+        extensionCache.set(filePath, path.extname(filePath).toLowerCase());
+    }
+    return extensionCache.get(filePath)!;
+}
+
 function isBinaryFile(filePath: string): boolean {
-    const ext = path.extname(filePath).toLowerCase();
+    const ext = getFileExtension(filePath);
     return BINARY_FILE_EXTENSIONS.has(ext);
 }
 
@@ -55,69 +62,57 @@ function isExcludedFile(filePath: string): boolean {
 }
 
 async function isCodingFile(file: vscode.Uri): Promise<boolean> {
-    const relativePath = vscode.workspace.asRelativePath(file);
-    if (isBinaryFile(file.fsPath) || isExcludedFile(file.fsPath) || !isFileSizeAllowed(file.fsPath)) {
+    const ext = getFileExtension(file.fsPath);
+    if (USER_EXCLUDE_EXTENSIONS.has(ext) || BINARY_FILE_EXTENSIONS.has(ext) || isExcludedFile(file.fsPath)) {
+        return false;
+    }
+    if (USER_INCLUDE_EXTENSIONS.has(ext)) {
+        return true;
+    }
+    if (!isFileSizeAllowed(file.fsPath)) {
         return false;
     }
     try {
         const doc = await vscode.workspace.openTextDocument(file);
-        const languageId = doc.languageId.toLowerCase();
-        if (CODING_LANGUAGES.has(languageId)) {
-            return true;
-        }
-        // Check if the file extension is in user include/exclude lists
-        const ext = path.extname(file.fsPath).toLowerCase();
-        if (USER_EXCLUDE_EXTENSIONS.has(ext)) {
-            return false;
-        }
-        if (USER_INCLUDE_EXTENSIONS.has(ext)) {
-            return true;
-        }
-        return false;
+        return CODING_LANGUAGES.has(doc.languageId.toLowerCase());
     } catch (error) {
         console.error(`Error opening file ${file.fsPath}:`, error);
         return false;
     }
 }
 
+class TreeNode {
+    children: Map<string, TreeNode> = new Map();
+    constructor(public name: string) {}
+}
+
 function generateFileTree(files: string[]): string {
-    const tree: { [key: string]: any } = {};
-
+    const root = new TreeNode('');
     for (const file of files) {
-        const parts = file.split(/[\/\\]/);  // Split on both forward and backward slashes
-        let currentLevel = tree;
-
-        for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            if (i === parts.length - 1) {
-                currentLevel[part] = null;
-            } else {
-                if (!currentLevel[part]) {
-                    currentLevel[part] = {};
-                }
-                currentLevel = currentLevel[part];
+        const parts = file.split(/[\/\\]/);
+        let currentNode = root;
+        for (const part of parts) {
+            if (!currentNode.children.has(part)) {
+                currentNode.children.set(part, new TreeNode(part));
             }
+            currentNode = currentNode.children.get(part)!;
         }
     }
 
-    function renderTree(node: { [key: string]: any }, prefix: string = '', isLast = true): string {
+    function renderTree(node: TreeNode, prefix: string = '', isLast = true): string {
         let result = '';
-        const keys = Object.keys(node).sort();
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            const isLastItem = i === keys.length - 1;
-            const newPrefix = prefix + (isLast ? '    ' : '│   ');
-
-            result += `${prefix}${isLastItem ? '└── ' : '├── '}${key}\n`;
-
-            if (node[key] !== null) {
-                result += renderTree(node[key], newPrefix, isLastItem);
-            }
+        const childrenArray = Array.from(node.children.values());
+        childrenArray.sort((a, b) => a.name.localeCompare(b.name));
+        for (let i = 0; i < childrenArray.length; i++) {
+            const child = childrenArray[i];
+            const isLastChild = i === childrenArray.length - 1;
+            result += `${prefix}${isLastChild ? '└── ' : '├── '}${child.name}\n`;
+            result += renderTree(child, prefix + (isLastChild ? '    ' : '│   '), isLastChild);
         }
         return result;
     }
 
-    return renderTree(tree, '', true);
+    return renderTree(root);
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -150,22 +145,19 @@ export function activate(context: vscode.ExtensionContext) {
         };
 
         await vscode.window.withProgress(progressOptions, async (progress, token) => {
-            let processedFiles = 0;
-            for (const file of files) {
+            const filePromises = files.map(async (file, index) => {
                 if (token.isCancellationRequested) {
-                    vscode.window.showInformationMessage(`Code extraction cancelled. Processed ${processedFiles} files, extracted ${extractedFiles.length}.`);
                     return;
                 }
 
                 const relativePath = path.relative(workspaceFolder.uri.fsPath, file.fsPath);
                 if (ig.ignores(relativePath) || isBinaryFile(file.fsPath) || isExcludedFile(file.fsPath)) {
-                    processedFiles++;
-                    continue;
+                    return;
                 }
 
                 progress.report({ 
                     increment: 100 / files.length, 
-                    message: `Processing ${relativePath} (${processedFiles + 1}/${files.length})` 
+                    message: `Processing ${relativePath} (${index + 1}/${files.length})` 
                 });
 
                 try {
@@ -178,17 +170,17 @@ export function activate(context: vscode.ExtensionContext) {
                 } catch (error) {
                     console.error(`Error processing file ${file.fsPath}:`, error);
                 }
+            });
 
-                processedFiles++;
-            }
+            await Promise.all(filePromises);
 
-            if (processedFiles > 0) {
+            if (extractedFiles.length > 0) {
                 const fileTree = generateFileTree(extractedFiles);
                 const fullMarkdown = `# Extracted Code Overview\n\n## File Tree\n\`\`\`\n${fileTree}\`\`\`\n${markdown}`;
                 
                 const markdownFile = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, outputFile));
                 await vscode.workspace.fs.writeFile(markdownFile, Buffer.from(fullMarkdown));
-                vscode.window.showInformationMessage(`Code extraction complete. Processed ${processedFiles} files, extracted ${extractedFiles.length} to ${outputFile}`);
+                vscode.window.showInformationMessage(`Code extraction complete. Extracted ${extractedFiles.length} files to ${outputFile}`);
             } else {
                 vscode.window.showInformationMessage('No files were processed. Check your ignore settings and file types.');
             }

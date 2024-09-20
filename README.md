@@ -14,7 +14,10 @@ With VSCode Artifactory, you can quickly create a concise representation of your
 - Excludes binary files and specific lock files
 - Provides a progress indicator during extraction
 - Configurable output file name
-
+- Configurable file size limit for input files
+- User-configurable file inclusion and exclusion based on file extensions
+- Optimized for performance with caching, parallel processing, and efficient data structures
+  
 ## Usage
 
 1. Open your project in VS Code
@@ -27,7 +30,10 @@ With VSCode Artifactory, you can quickly create a concise representation of your
 
 This extension contributes the following settings:
 
-* `vscode-artifactory.outputFile`: The name of the output file for extracted code (default: "extracted_code.md")
+- `vscode-artifactory.outputFile`: The name of the output file for extracted code (default: "extracted_code.md")
+- `vscode-artifactory.includeExtensions`: List of file extensions to include (e.g., ['.ahk', '.ini'])
+- `vscode-artifactory.excludeExtensions`: List of file extensions to exclude (overrides includeExtensions)
+- `vscode-artifactory.maxFileSizeKB`: Maximum file size in KB to process (default: 1024 KB or 1 MB)
 
 ## Requirements
 
