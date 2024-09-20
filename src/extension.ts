@@ -7,6 +7,7 @@ const config = vscode.workspace.getConfiguration('vscode-artifactory');
 const outputFile = config.get('outputFile', 'extracted_code.md');
 const userIncludeExtensions: string[] = config.get('includeExtensions', []);
 const userExcludeExtensions: string[] = config.get('excludeExtensions', []);
+const maxFileSizeKB = config.get('maxFileSizeKB', 1024);
 
 // Convert user-provided extensions to lowercase and ensure they start with a dot
 const normalizeExtensions = (extensions: string[]): Set<string> => {
@@ -54,7 +55,8 @@ function isExcludedFile(filePath: string): boolean {
 }
 
 async function isCodingFile(file: vscode.Uri): Promise<boolean> {
-    if (isBinaryFile(file.fsPath) || isExcludedFile(file.fsPath)) {
+    const relativePath = vscode.workspace.asRelativePath(file);
+    if (isBinaryFile(file.fsPath) || isExcludedFile(file.fsPath) || !isFileSizeAllowed(file.fsPath)) {
         return false;
     }
     try {
@@ -194,6 +196,12 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(disposable);
+}
+
+function isFileSizeAllowed(filePath: string): boolean {
+    const stats = fs.statSync(filePath);
+    const fileSizeInKB = stats.size / 1024;
+    return fileSizeInKB <= maxFileSizeKB;
 }
 
 export function deactivate() {}

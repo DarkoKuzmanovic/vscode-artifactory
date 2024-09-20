@@ -39,31 +39,7 @@ Currently, there are no known issues. If you encounter any problems, please repo
 
 ## Release Notes
 
-### 0.6.0
-
-- Added new configuration options for including and excluding file extensions
-- Users can now specify includeExtensions and excludeExtensions in settings
-- Enhanced file filtering logic to respect user-defined extension preferences
-- Improved error handling and user feedback during code extraction process
-- Updated output message to reflect user-configured output filename
-- Optimized file tree generation for better organization of extracted files
-
-### 0.5.2
-
-- Made smaller changes to code
-
-### 0.5.1
-
-- Changed displayName
-
-### 0.5.0
-
-Initial release of VSCode Artifactory:
-
-- Basic code extraction functionality
-- File tree generation
-- Progress indicator
-- Configurable output file name
+Check [CHANGELOG.md](CHANGELOG.md) for release notes and version history.
 
 ---
 
